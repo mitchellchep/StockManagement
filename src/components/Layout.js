@@ -4,7 +4,7 @@ import Header from "./Header";
 import Slider from "./Slider";
 import { Outlet } from "react-router-dom";
 
-const Layout = () => {
+const Layout = ({children}) => {
     return (
         <>           
             <Slider />
