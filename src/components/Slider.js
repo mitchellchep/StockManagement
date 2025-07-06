@@ -7,28 +7,64 @@ const Slider = () => {
   const apiKey = process.env.REACT_APP_API_KEY; // Ensure you have your API key set in .env file
 
   useEffect(() => {
-    const fetchStockData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`https://api.example.com/stocks/${symbol}`);
-        setStockData(response.data);
+        const options = {
+          method: 'GET',
+          url:'https://yfapi.net/v6/finance/quote/marketSummary',
+          headers: {
+            'x-api-key': apiKey,
+          },
+        };  
+
+        const response = await axios.request(options);
+        setData(response.data.marketSummaryResponse.result);
       } catch (error) {
-        console.error('Error fetching stock data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching data:', error);
       }
-    };
+    }    
+      fetchData();
+    }, [apiKey]);
 
-    fetchStockData();
-  }, [symbol]);
+    return (
+      <>
+      {     
+        data ? (
+          <div className="slider">
+            <div>
+            {
+                data.map((item, index) => {
+                   return item.regularMarketChange.raw > 0 ? 
+                   (
+                    <span className='slider-market-raw' key={index}>
+                      <span className='slider-name'> {item.shortName}</span>
+                      {" "}
+                      {item.regularMarketPrice.fmt}
+                      <span style={{color:"green"}}>{""} {item.regularMarketChange.fmt} {""}
+                        (+{item.regularMarketChangePercent.fmt})</span>
+                        </span>
+                        ) :
+                        (
+                          <span className='slider-market-raw' key={index}>
+                          <span className='slider-name'> {item.shortName}</span>
+                          {" "}
+                          {item.regularMarketPrice.fmt}
+                          <span style={{color:"red"}}>{""} {item.regularMarketChange.fmt} {""}
+                          ({item.regularMarketChangePercent.fmt})</span>
+                          </span>
+                        )
+                        })
+                      }
+                      </div>
+                      </div>
+        )
+        : (
+          <div> Loading... </div>
+        )
+      }     
+      </>
+    )
+  }
+export default Slider;
 
-  if (loading) return <div>Loading...</div>;
-  if (!stockData) return <div>No data available</div>;
-
-  return (
-    <div className="slider">
-      <h2>{stockData.name} ({stockData.symbol})</h2>
-      <p>Current Price: ${stockData.price}</p>
-      <p>Change: {stockData.change}%</p>
-    </div>
-  );
-}
+    
